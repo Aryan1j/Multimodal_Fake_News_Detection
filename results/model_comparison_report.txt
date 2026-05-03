@@ -1,0 +1,84 @@
+================================================================================
+FAKE NEWS CLASSIFICATION MODEL COMPARISON REPORT
+Short Form vs Long Form Text Analysis
+================================================================================
+
+DATASET INFORMATION
+----------------------------------------
+Short text threshold: <100 words
+Long text threshold: >=100 words
+Total test samples: 14427
+Short form samples: 1505
+Long form samples: 12922
+
+
+========================================
+BERT MODEL
+========================================
+
+SHORT FORM:
+  Accuracy:  0.9694
+  Precision: 0.9833
+  Recall:    0.9634
+  F1 Score:  0.9733
+  Samples:   1505
+
+LONG FORM:
+  Accuracy:  0.9378
+  Precision: 0.9313
+  Recall:    0.9472
+  F1 Score:  0.9392
+  Samples:   12922
+
+
+========================================
+ROBERTA MODEL
+========================================
+
+SHORT FORM:
+  Accuracy:  0.9746
+  Precision: 0.9912
+  Recall:    0.9646
+  F1 Score:  0.9777
+  Samples:   1505
+
+LONG FORM:
+  Accuracy:  0.9506
+  Precision: 0.9618
+  Recall:    0.9398
+  F1 Score:  0.9507
+  Samples:   12922
+
+
+========================================
+DISTILBERT MODEL
+========================================
+
+SHORT FORM:
+  Accuracy:  0.9638
+  Precision: 0.9820
+  Recall:    0.9549
+  F1 Score:  0.9683
+  Samples:   7523
+
+LONG FORM:
+  Accuracy:  0.9298
+  Precision: 0.9296
+  Recall:    0.9323
+  F1 Score:  0.9309
+  Samples:   64611
+
+
+================================================================================
+SUMMARY & RECOMMENDATIONS
+================================================================================
+
+Best Model for SHORT FORM texts:
+  By Accuracy: ROBERTA (0.9746)
+  By F1 Score: ROBERTA (0.9777)
+
+Best Model for LONG FORM texts:
+  By Accuracy: ROBERTA (0.9506)
+  By F1 Score: ROBERTA (0.9507)
+
+Best OVERALL Model: ROBERTA (Accuracy: 0.9531)

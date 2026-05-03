@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Classifier</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e4e4e7;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e4e4e7;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+        
+        textarea::placeholder {
+            color: #64748b;
+        }
+        
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e4e4e7;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+        
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result.real {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .result.fake {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .result.error {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        .prediction-label {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result.real .prediction-label {
+            color: #22c55e;
+        }
+        
+        .result.fake .prediction-label {
+            color: #ef4444;
+        }
+        
+        .result.error .prediction-label {
+            color: #fbbf24;
+        }
+        
+        .confidence {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .model-used {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .note {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(251, 191, 36, 0.1);
+            border-radius: 6px;
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+        
+        .evidence {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(96, 165, 250, 0.1);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .evidence-title {
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.25rem;
+        }
+        
+        .evidence-text {
+            color: #94a3b8;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .breakdown {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+        }
+        .breakdown-title, .explanation-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.6rem;
+        }
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+        .score-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            width: 110px;
+            flex-shrink: 0;
+        }
+        .score-bar-wrap {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .score-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        .score-val {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            width: 36px;
+            text-align: right;
+        }
+        .explanation {
+           margin-top: 1rem;
+           padding: 0.75rem;
+           background: rgba(255,255,255,0.04);
+           border-radius: 8px;
+        }
+        .explanation ul {
+           list-style: none;
+           padding: 0;
+           margin: 0;
+        }
+        .explanation ul li {
+           font-size: 0.88rem;
+           color: #94a3b8;
+          padding: 0.25rem 0 0.25rem 1rem;
+          position: relative;
+        }
+        .explanation ul li::before {
+          content: "›";
+          position: absolute;
+          left: 0;
+          color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fake News Classifier</h1>
+        <p class="subtitle">Analyze news articles using transformer models</p>
+        
+        <div class="card">
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="text">News Article Text</label>
+                    <textarea 
+                        id="text" 
+                        name="text" 
+                        placeholder="Paste the news article text here..."
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <select id="model" name="model">
+                        {% for key, name in models.items() %}
+                        <option value="{{ key }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" id="predictBtn">Analyze Article</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing article...</p>
+            </div>
+            
+            <div class="result" id="result">
+                <div class="prediction-label" id="predictionLabel"></div>
+                <div class="confidence" id="confidence"></div>
+                <div class="model-used" id="modelUsed"></div>
+                <div class="note" id="note" style="display: none;"></div>
+                <div class="evidence" id="evidence" style="display: none;">
+                    <div class="evidence-title">Evidence Check</div>
+                    <div class="evidence-text" id="evidenceText"></div>
+                </div>  
+                <!-- Score Breakdown -->
+    <div class="breakdown" id="breakdown" style="display:none;">
+        <div class="breakdown-title">Score Breakdown</div>
+
+        <div class="score-row">
+            <span class="score-label">Model score</span>
+            <div class="score-bar-wrap">
+                <div class="score-bar" id="barModel"></div>
+            </div>
+            <span class="score-val" id="valModel"></span>
+        </div>
+
+        <div class="score-row">
+            <span class="score-label">Context score</span>
+            <div class="score-bar-wrap">
+                <div class="score-bar" id="barContext"></div>
+            </div>
+            <span class="score-val" id="valContext"></span>
+        </div>
+
+        <div class="score-row">
+            <span class="score-label">Evidence score</span>
+            <div class="score-bar-wrap">
+                <div class="score-bar" id="barEvidence"></div>
+            </div>
+            <span class="score-val" id="valEvidence"></span>
+        </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explanation" id="explanation" style="display:none;">
+        <div class="explanation-title">Why this prediction?</div>
+        <ul id="explanationList"></ul>
+    </div>
+</div>                
+            </div>
+        </div>
+        
+        <footer>
+            Built with BERT, RoBERTa, and DistilBERT transformers.
+            <br>
+            <a href="https://github.com/huggingface/transformers">Powered by HuggingFace Transformers</a>
+        </footer>
+    </div>
+    
+    <script>
+        const form = document.getElementById('predictionForm');
+        const predictBtn = document.getElementById('predictBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const predictionLabel = document.getElementById('predictionLabel');
+        const confidence = document.getElementById('confidence');
+        const modelUsed = document.getElementById('modelUsed');
+        const note = document.getElementById('note');
+        const evidence = document.getElementById('evidence');
+        const evidenceText = document.getElementById('evidenceText');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = document.getElementById('text').value.trim();
+            const model = document.getElementById('model').value;
+            
+            if (!text) {
+                alert('Please enter some text to analyze.');
+                return;
+            }
+            
+            // Show loading, hide result
+            predictBtn.disabled = true;
+            loading.classList.add('show');
+            result.classList.remove('show');
+            
+           try {
+    const response = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, model })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    predictionLabel.textContent = data.prediction;
+    confidence.textContent = `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+    modelUsed.textContent = `Model: ${data.model}`;
+    result.className = 'result show';
+    result.classList.add(data.prediction === 'Real' ? 'real' : 'fake');
+
+    if (data.note) { note.textContent = data.note; note.style.display = 'block'; }
+    else { note.style.display = 'none'; }
+
+    if (data.breakdown) {
+        const setBar = (barId, valId, score) => {
+            document.getElementById(barId).style.width = (score * 100).toFixed(0) + '%';
+            document.getElementById(valId).textContent  = (score * 100).toFixed(0) + '%';
+        };
+        setBar('barModel',    'valModel',    data.breakdown.model_score);
+        setBar('barContext',  'valContext',  data.breakdown.context_score);
+        setBar('barEvidence', 'valEvidence', data.breakdown.evidence_score);
+        document.getElementById('breakdown').style.display = 'block';
+    } else {
+        document.getElementById('breakdown').style.display = 'none';
+    }
+
+    if (data.explanation && data.explanation.length) {
+        document.getElementById('explanationList').innerHTML =
+            data.explanation.map(line => `<li>${line}</li>`).join('');
+        document.getElementById('explanation').style.display = 'block';
+    } else {
+        document.getElementById('explanation').style.display = 'none';
+    }
+
+    if (data.evidence_snippets && data.evidence_snippets.length) {
+        evidenceText.textContent = data.evidence_snippets
+            .map(s => `[${s.stance}] ${s.text.substring(0, 120)}...`)
+            .join('\n\n');
+        evidence.style.display = 'block';
+    } else {
+        evidence.style.display = 'none';
+    }
+                
+            } catch (error) {
+                predictionLabel.textContent = 'Error';
+                confidence.textContent = error.message;
+                modelUsed.textContent = '';
+                note.style.display = 'none';
+                evidence.style.display = 'none';
+                
+                result.className = 'result show error';
+            } finally {
+                predictBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+Evaluation Length Context
+========================================
+
+Short text threshold: <100 words
+Long text threshold: >=100 words
+
+Short segment name: short_lt100_words
+Long segment name: long_ge100_words
+
+Total test samples: 14427
+Short samples: 1522
+Long samples: 12905
