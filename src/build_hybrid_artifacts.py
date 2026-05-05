@@ -1,10 +1,7 @@
-"""
-Run this ONCE after your models are trained.
-It builds the calibration files and evidence index that the hybrid layer needs.
 
-Usage:
-    python -m src.build_hybrid_artifacts
-"""
+# Run this ONCE after your models are trained.
+# It builds the calibration files and evidence index that the hybrid layer needs.
+
 
 import json
 import sys

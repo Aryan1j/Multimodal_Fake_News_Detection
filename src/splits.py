@@ -17,7 +17,6 @@ from .config import (
 )
 
 
-# Split file version for compatibility checking
 SPLIT_VERSION = 2
 
 
@@ -35,15 +34,6 @@ def compute_stratified_split(
     1. Split into train+val (80%) vs test (20%)
     2. Split train+val into train (87.5% of 80% = 70%) vs val (12.5% of 80% = 10%)
     
-    Args:
-        df: DataFrame with 'label' column for stratification
-        train_frac: Fraction for training set
-        val_frac: Fraction for validation set
-        test_frac: Fraction for test set
-        random_seed: Random seed for reproducibility
-        
-    Returns:
-        Tuple of (train_indices, val_indices, test_indices)
     """
     indices = np.arange(len(df))
     labels = df['label'].values
@@ -82,19 +72,7 @@ def create_split_metadata(
     dedupe: bool,
     max_samples: Optional[int]
 ) -> Dict[str, Any]:
-    """
-    Create metadata dictionary for split file.
-    
-    Args:
-        csv_path: Path to the source CSV
-        n_rows: Number of rows in the cleaned DataFrame
-        lowercase: Whether lowercase cleaning was applied
-        dedupe: Whether deduplication was applied
-        max_samples: Max samples limit (None if not limited)
-        
-    Returns:
-        Metadata dictionary
-    """
+ 
     return {
         'version': SPLIT_VERSION,
         'csv_path': str(csv_path),
@@ -113,20 +91,7 @@ def split_metadata_matches_current(
     dedupe: bool,
     max_samples: Optional[int]
 ) -> bool:
-    """
-    Check if saved split metadata matches current data configuration.
     
-    Args:
-        saved_metadata: Metadata from saved split file
-        csv_path: Current CSV path
-        n_rows: Current row count
-        lowercase: Current lowercase setting
-        dedupe: Current dedupe setting
-        max_samples: Current max_samples setting
-        
-    Returns:
-        True if metadata matches, False otherwise
-    """
     if saved_metadata.get('version') != SPLIT_VERSION:
         return False
     
@@ -150,16 +115,7 @@ def save_split(
     metadata: Dict[str, Any],
     path: Path = SPLIT_JSON_PATH
 ) -> None:
-    """
-    Save split indices and metadata to JSON file.
-    
-    Args:
-        train_indices: Training set indices
-        val_indices: Validation set indices
-        test_indices: Test set indices
-        metadata: Split metadata dictionary
-        path: Path to save the split file
-    """
+ 
     path.parent.mkdir(parents=True, exist_ok=True)
     
     split_data = {
@@ -177,15 +133,7 @@ def save_split(
 
 
 def load_split(path: Path = SPLIT_JSON_PATH) -> Optional[Dict[str, Any]]:
-    """
-    Load split data from JSON file.
-    
-    Args:
-        path: Path to the split file
-        
-    Returns:
-        Split data dictionary or None if file doesn't exist
-    """
+  
     if not path.exists():
         return None
     
@@ -197,16 +145,7 @@ def apply_saved_indices(
     df: pd.DataFrame,
     split_data: Dict[str, Any]
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """
-    Apply saved indices to split a DataFrame.
-    
-    Args:
-        df: Full DataFrame to split
-        split_data: Split data with train/val/test indices
-        
-    Returns:
-        Tuple of (train_df, val_df, test_df)
-    """
+   
     train_df = df.iloc[split_data['train_indices']].reset_index(drop=True)
     val_df = df.iloc[split_data['val_indices']].reset_index(drop=True)
     test_df = df.iloc[split_data['test_indices']].reset_index(drop=True)
@@ -222,23 +161,7 @@ def ensure_data_split(
     max_samples: Optional[int] = None,
     force_new: bool = False
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """
-    Ensure a valid data split exists, creating one if needed.
-    
-    This is the main entry point for getting train/val/test DataFrames.
-    It loads an existing split if metadata matches, otherwise creates a new one.
-    
-    Args:
-        df: Cleaned DataFrame
-        csv_path: Path to source CSV
-        lowercase: Whether lowercase cleaning was applied
-        dedupe: Whether deduplication was applied
-        max_samples: Max samples limit
-        force_new: Force creation of new split even if one exists
-        
-    Returns:
-        Tuple of (train_df, val_df, test_df)
-    """
+   
     n_rows = len(df)
     
     if not force_new:
@@ -279,19 +202,7 @@ def remove_stale_split_before_training(
     dedupe: bool,
     max_samples: Optional[int]
 ) -> None:
-    """
-    Remove stale split file if training args have changed.
     
-    Call this before ensure_data_split during training to ensure
-    splits are regenerated when training configuration changes.
-    
-    Args:
-        csv_path: Path to source CSV
-        n_rows: Number of rows in cleaned DataFrame
-        lowercase: Whether lowercase cleaning is applied
-        dedupe: Whether deduplication is applied
-        max_samples: Max samples limit
-    """
     split_data = load_split()
     
     if split_data is None:

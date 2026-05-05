@@ -1,8 +1,3 @@
-"""
-Evaluate - Model evaluation script with metrics by text length.
-
-CLI: python -m src.evaluate
-"""
 
 import argparse
 import json
@@ -80,19 +75,7 @@ def evaluate_model(
     batch_size: int,
     device: torch.device
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Evaluate a single model and return predictions.
     
-    Args:
-        model_key: Model key (bert, roberta, distilbert)
-        test_texts: Test texts
-        test_labels: Test labels
-        batch_size: Batch size
-        device: Device for inference
-        
-    Returns:
-        Tuple of (predictions array, labels array)
-    """
     model_dir = MODEL_KEY_TO_DIR[model_key]
     
     print(f"\nLoading {model_key.upper()} from {model_dir}...")
@@ -132,16 +115,7 @@ def compute_metrics(
     y_true: np.ndarray,
     y_pred: np.ndarray
 ) -> Dict[str, float]:
-    """
-    Compute classification metrics.
     
-    Args:
-        y_true: True labels
-        y_pred: Predicted labels
-        
-    Returns:
-        Dictionary with accuracy, precision, recall, f1
-    """
     return {
         'accuracy': accuracy_score(y_true, y_pred),
         'precision': precision_score(y_true, y_pred, zero_division=0),
@@ -157,16 +131,7 @@ def save_results(
     confusion_by_length: Dict[str, Dict[str, List[List[int]]]],
     length_context: Dict[str, Any]
 ) -> None:
-    """
-    Save all evaluation results to the results directory.
-    
-    Args:
-        metrics_by_model: Overall metrics per model
-        metrics_by_length: Metrics per model and length segment
-        confusion_matrices: Confusion matrices per model
-        confusion_by_length: Confusion matrices per model and length segment
-        length_context: Length evaluation context information
-    """
+   
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     
     # Save overall metrics

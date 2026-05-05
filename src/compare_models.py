@@ -1,11 +1,6 @@
-"""
-Compare Models - Detailed comparison of models on short vs long form texts.
 
-This script provides comprehensive analysis comparing BERT, RoBERTa, and DistilBERT
-performance on short-form vs long-form fake news articles.
+# Compare Models - Detailed comparison of models on short vs long form texts.
 
-CLI: python -m src.compare_models
-"""
 
 import json
 from pathlib import Path

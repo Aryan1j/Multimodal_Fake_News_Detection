@@ -45,15 +45,7 @@ def get_model_display_name(model_key: str) -> str:
 
 
 def load_model(model_key: str) -> Tuple:
-    """
-    Load model and tokenizer, using cache if available.
-    
-    Args:
-        model_key: Model key (bert, roberta, distilbert)
-        
-    Returns:
-        Tuple of (tokenizer, model, device)
-    """
+
     if model_key in _model_cache:
         return _model_cache[model_key]
     
@@ -173,13 +165,6 @@ def predict_batch(
 ) -> list:
     """
     Make predictions on a batch of texts.
-    
-    Args:
-        texts: List of raw text strings
-        model_key: Model to use
-        
-    Returns:
-        List of PredictionResult objects
     """
     return [predict(text, model_key) for text in texts]
 

@@ -10,17 +10,6 @@ def build_input_text(title: str, text: str, sep_token: str = "[SEP]") -> str:
     """
     Build the input text string for the model from title and text.
     
-    Format: "title [SEP] text"
-    
-    This must match the format used during training for consistent inference.
-    
-    Args:
-        title: Article title
-        text: Article body text
-        sep_token: Separator token (default [SEP] works for BERT-family models)
-        
-    Returns:
-        Combined input string
     """
     title = str(title).strip() if title else ""
     text = str(text).strip() if text else ""
@@ -41,21 +30,7 @@ def add_model_input_column(
     text_col: str = "text",
     output_col: str = "input_text"
 ) -> pd.DataFrame:
-    """
-    Add a model input column combining title and text.
     
-    This creates the 'input_text' column that the tokenizer will process.
-    Use this after cleaning so train/eval use the same string format.
-    
-    Args:
-        df: DataFrame with title and text columns
-        title_col: Name of title column
-        text_col: Name of text column
-        output_col: Name of output column to create
-        
-    Returns:
-        DataFrame with added input_text column
-    """
     df = df.copy()
     df[output_col] = df.apply(
         lambda row: build_input_text(row[title_col], row[text_col]),
@@ -65,14 +40,7 @@ def add_model_input_column(
 
 
 def _normalize_user_input(text: str) -> str:
-    """
-    Normalize user-provided text to better match training data distribution.
-
-    Handles out-of-distribution (OOD) formatting like:
-    - Structured label prefixes: "Virus Identification: ..."
-    - Bullet points / numbered lists
-    - Excessive newlines
-    """
+   
     # Remove structured label prefixes e.g. "Vaccine Development: "
     text = re.sub(r"^[A-Z][^:\n]{3,40}:\s*", "", text, flags=re.MULTILINE)
 
@@ -88,20 +56,7 @@ def _normalize_user_input(text: str) -> str:
 
 
 def preprocess_user_input(raw_text: str) -> str:
-    """
-    Preprocess user input for inference.
-    
-    For user-provided text that may not have a separate title:
-    - Normalizes OOD formatting (structured headers, bullets, etc.)
-    - If text is short (< 50 words), treat it as a title
-    - If text is long, extract first sentence as synthetic title
-    
-    Args:
-        raw_text: Raw user input text
-        
-    Returns:
-        Preprocessed input string in the same format as training data
-    """
+
     raw_text = str(raw_text).strip()
     
     if not raw_text:

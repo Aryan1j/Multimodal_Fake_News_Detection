@@ -1,13 +1,7 @@
-"""
-Flask Application - Web interface for fake news classification.
-
-Run: python -m app.app
-"""
-
 import sys
 from pathlib import Path
 
-# Add project root to path for imports when running as __main__
+
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -17,11 +11,9 @@ from flask import Flask, render_template, request, jsonify
 from src.hybrid_detector import predict_hybrid, predict_ensemble
 
 
-# Create Flask app
 app = Flask(__name__)
 
 
-# Available models
 AVAILABLE_MODELS = {
     'bert':       'BERT',
     'roberta':    'RoBERTa',

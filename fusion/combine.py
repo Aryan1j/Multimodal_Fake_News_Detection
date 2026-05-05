@@ -1,66 +1,54 @@
-"""
-Improved Score Fusion for Hybrid Fake News Detector.
-
-Key improvements:
-1. Adaptive weights: if context/evidence are weak signals, trust transformer more
-2. Confidence-gated context: only use context score when it's decisive (>0.65 or <0.35)
-3. Evidence quality check: only apply evidence when similarity is high enough to trust
-4. Better explanation messages tied to actual scores
-"""
-
 from typing import Dict, List
 
 
 DEFAULT_WEIGHTS = {
-    "roberta": 0.70,   # Transformer is the strongest signal — raised from 0.60
-    "context": 0.15,   # Context is supplementary — lowered from 0.20
-    "evidence": 0.15,  # Evidence is supplementary — lowered from 0.20
+    "roberta": 0.70,   
+    "context": 0.15,   
+    "evidence": 0.15,  
 }
 
-# When context or evidence are in the "uncertain middle" zone,
-# their contribution is reduced to avoid pulling away a correct transformer score
 UNCERTAIN_ZONE_LOW = 0.35
 UNCERTAIN_ZONE_HIGH = 0.65
 
 
 def _is_uncertain(score: float) -> bool:
-    """Returns True if a score is in the uncertain middle zone."""
+    #Returns True if a score is in the uncertain middle zone.
     return UNCERTAIN_ZONE_LOW <= score <= UNCERTAIN_ZONE_HIGH
 
 
 def combine_scores(
-    roberta_score: float,
+    transformer_score: float,
     context_score: float,
     evidence_score: float,
+    model_key: str,
     weights: Dict[str, float] | None = None,
 ) -> float:
-    """
-    Combine transformer, context, and evidence scores with adaptive weighting.
+
+    # Combine transformer, context, and evidence scores with adaptive weighting.
+    # If context or evidence are uncertain (near 0.5), their weight is
+    # redistributed to the transformer score to avoid noise-driven errors.
     
-    If context or evidence are uncertain (near 0.5), their weight is
-    redistributed to the transformer score to avoid noise-driven errors.
-    """
     active_weights = dict(weights or DEFAULT_WEIGHTS)
 
-    # Adaptive weight redistribution
+   
     context_uncertain = _is_uncertain(context_score)
     evidence_uncertain = _is_uncertain(evidence_score)
 
     if context_uncertain and evidence_uncertain:
-        # Both supplementary signals are uncertain — trust transformer almost fully
-        w_model = active_weights["roberta"] + active_weights["context"] * 0.7 + active_weights["evidence"] * 0.7
+       
+        w_model = active_weights[model_key] + active_weights["context"] * 0.7 + active_weights["evidence"] * 0.7
         w_context = active_weights["context"] * 0.3
         w_evidence = active_weights["evidence"] * 0.3
     elif context_uncertain:
-        w_model = active_weights["roberta"] + active_weights["context"] * 0.6
+        w_model = active_weights[model_key] + active_weights["context"] * 0.6
         w_context = active_weights["context"] * 0.4
         w_evidence = active_weights["evidence"]
     elif evidence_uncertain:
-        w_model = active_weights["roberta"] + active_weights["evidence"] * 0.6
+        w_model = active_weights[model_key] + active_weights["evidence"] * 0.6
         w_context = active_weights["context"]
         w_evidence = active_weights["evidence"] * 0.4
     else:
-        w_model = active_weights["roberta"]
+        w_model = active_weights[model_key]
         w_context = active_weights["context"]
         w_evidence = active_weights["evidence"]
 
@@ -71,7 +59,7 @@ def combine_scores(
     w_evidence /= total
 
     final_score = (
-        w_model * roberta_score
+        w_model * transformer_score
         + w_context * context_score
         + w_evidence * evidence_score
     )
@@ -80,7 +68,7 @@ def combine_scores(
 
 def build_explanation(
     final_label: str,
-    roberta_score: float,
+    transformer_score: float,
     context_details: dict,
     evidence_snippets: List[dict],
     model_name: str = "The classifier",
@@ -91,14 +79,14 @@ def build_explanation(
     sentiment = context_details.get("sentiment", {})
 
     # Lead with transformer verdict and confidence
-    model_pct = int(roberta_score * 100)
-    if roberta_score >= 0.75:
+    model_pct = int(transformer_score * 100)
+    if transformer_score >= 0.75:
         lines.append(f"{model_name} is strongly confident this is FAKE ({model_pct}% fake score).")
-    elif roberta_score >= 0.55:
+    elif transformer_score >= 0.55:
         lines.append(f"{model_name} leans toward FAKE with a score of {model_pct}%.")
-    elif roberta_score <= 0.25:
+    elif transformer_score <= 0.25:
         lines.append(f"{model_name} is strongly confident this is REAL ({100 - model_pct}% real score).")
-    elif roberta_score <= 0.45:
+    elif transformer_score <= 0.45:
         lines.append(f"{model_name} leans toward REAL with a score of {100 - model_pct}% real.")
     else:
         lines.append(f"{model_name} is uncertain (score near 50%) — treat result with caution.")

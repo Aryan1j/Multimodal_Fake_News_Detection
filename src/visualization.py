@@ -131,13 +131,7 @@ def plot_confusion_matrix(cm: list, model_name: str, output_path: Path):
 
 
 def plot_metrics_by_length(length_df: pd.DataFrame, output_path: Path):
-    """
-    Create a grouped bar chart comparing metrics by text length.
-    
-    Args:
-        length_df: DataFrame with model, segment, and metrics columns
-        output_path: Path to save the plot
-    """
+    #Create a bar chart comparing metrics by text length.
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     axes = axes.flatten()
     
@@ -162,7 +156,7 @@ def plot_metrics_by_length(length_df: pd.DataFrame, output_path: Path):
         ax.set_ylim(0, 1.1)
         ax.grid(axis='y', alpha=0.3)
         
-        # Add value labels
+      
         for container in ax.containers:
             ax.bar_label(container, fmt='%.3f', fontsize=7)
     
@@ -206,10 +200,10 @@ def main():
     print("Generating visualizations...")
     print("="*60)
     
-    # Ensure output directory exists
+    
     GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
     
-    # Load results
+   
     results = load_results()
     
     if not results:

@@ -1,7 +1,3 @@
-"""
-Connects your 3 trained models to the hybrid layer.
-Used only by the web app — does not affect training or comparison.
-"""
 
 import json
 import sys
@@ -181,11 +177,13 @@ def predict_hybrid(text: str, model_key: str = "roberta") -> HybridPredictionRes
     ev_score        = _evidence_score(snippets)
 
     final_score = combine_scores(
-        roberta_score=model_score,
+        transformer_score=model_score,
         context_score=context_details["context_score"],
         evidence_score=ev_score,
+        model_key=model_key,
         weights=weights,
     )
+    
 
     label      = "FAKE" if final_score >= 0.5 else "REAL"
     confidence = final_score if label == "FAKE" else 1.0 - final_score
@@ -268,13 +266,14 @@ def predict_ensemble(text: str) -> HybridPredictionResult:
     snippets        = _get_retriever().retrieve(input_text)
     ev_score        = _evidence_score(snippets)
 
-    # Use default weights for ensemble fusion
+   
     final_score = combine_scores(
-        roberta_score=avg_model_score,
-        context_score=context_details["context_score"],
-        evidence_score=ev_score,
-        weights=DEFAULT_WEIGHTS,
-    )
+    transformer_score=avg_model_score,
+    context_score=context_details["context_score"],
+    evidence_score=ev_score,
+    model_key="roberta",   # or "ensemble" — any key in DEFAULT_WEIGHTS
+    weights=DEFAULT_WEIGHTS,
+)
 
     label      = "FAKE" if final_score >= 0.5 else "REAL"
     confidence = final_score if label == "FAKE" else 1.0 - final_score

@@ -108,13 +108,7 @@ class LocalEvidenceRetriever:
 
 
 def infer_stance(claim: str, evidence: str, similarity: float) -> str:
-    """
-    Improved stance detection using negation context and keyword overlap.
-    
-    Key fix: original version only counted negation tokens globally.
-    This version checks for negation in the CONTEXT of shared keywords,
-    which is far more reliable.
-    """
+   
     claim_tokens = set(re.findall(r"\b\w+\b", claim.lower()))
     evidence_tokens = set(re.findall(r"\b\w+\b", evidence.lower()))
 

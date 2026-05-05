@@ -1,8 +1,5 @@
-"""
-Train - Main training script for fake news classification models.
 
-CLI: python -m src.train --models bert roberta distilbert --epochs 3
-"""
+#Train - Main training script for fake news classification models.
 
 import argparse
 import json
@@ -115,20 +112,7 @@ def train_one_epoch(
     device: torch.device,
     label_smoothing: float = 0.0
 ) -> float:
-    """
-    Train model for one epoch.
-    
-    Args:
-        model: HuggingFace model
-        dataloader: Training DataLoader
-        optimizer: Optimizer
-        scheduler: Learning rate scheduler
-        device: Device to train on
-        label_smoothing: Label smoothing factor
-        
-    Returns:
-        Average training loss for the epoch
-    """
+   
     model.train()
     total_loss = 0.0
     
@@ -169,17 +153,7 @@ def validate(
     dataloader,
     device: torch.device
 ) -> float:
-    """
-    Validate model on validation set.
-    
-    Args:
-        model: HuggingFace model
-        dataloader: Validation DataLoader
-        device: Device for inference
-        
-    Returns:
-        Average validation loss
-    """
+   
     model.eval()
     total_loss = 0.0
     
@@ -218,25 +192,7 @@ def train_one_model(
     label_smoothing: float,
     device: torch.device
 ) -> Dict[str, List[float]]:
-    """
-    Train a single model with validation-based checkpointing.
-    
-    Args:
-        model_key: Model key (bert, roberta, distilbert)
-        train_texts: Training texts
-        train_labels: Training labels
-        val_texts: Validation texts
-        val_labels: Validation labels
-        epochs: Number of epochs
-        batch_size: Batch size
-        learning_rate: Learning rate
-        weight_decay: Weight decay
-        label_smoothing: Label smoothing factor
-        device: Training device
-        
-    Returns:
-        Training history dictionary with train_loss and val_loss lists
-    """
+  
     model_id = MODEL_IDS[model_key]
     save_dir = MODEL_KEY_TO_DIR[model_key]
     

@@ -1,18 +1,7 @@
-"""
-Improved Sentiment Analysis for Fake News Detection.
-
-Key insight: Raw polarity is NOT a reliable fake news signal.
-What matters is:
-- HIGH subjectivity (fake news is opinionated, not factual)
-- Emotional intensity / extreme language density
-- Absence of journalistic hedging (real news hedges claims)
-- Sentence-level tone variance (fake news mixes calm + explosive sentences)
-"""
-
 from textblob import TextBlob
 
 
-# Emotionally charged / fear-mongering words common in fake news
+
 EMOTIONAL_AMPLIFIERS = {
     "horrific", "terrifying", "devastating", "outrageous", "disgusting",
     "shocking", "explosive", "bombshell", "alarming", "catastrophic",
@@ -24,7 +13,7 @@ EMOTIONAL_AMPLIFIERS = {
     "insane", "lunatic", "monster", "regime", "puppet",
 }
 
-# Hedge words — real journalism uses these; fake news avoids them
+
 HEDGE_WORDS = {
     "allegedly", "reportedly", "according to", "sources say",
     "officials said", "confirmed", "unconfirmed", "claims",
@@ -54,7 +43,7 @@ def analyze_sentiment(text: str) -> dict:
     amplifier_hits = sum(1 for word in EMOTIONAL_AMPLIFIERS if word in lower)
     amplifier_density = min(1.0, amplifier_hits / max(1, word_count / 20))
 
-    # Hedge word absence: lack of hedging in long text is suspicious
+    # Hedge word absence
     hedge_hits = sum(1 for phrase in HEDGE_WORDS if phrase in lower)
     hedge_ratio = min(1.0, hedge_hits / max(1, word_count / 50))
     hedge_suspicion = 1.0 - min(1.0, hedge_ratio * 3.0) if word_count > 50 else 0.0

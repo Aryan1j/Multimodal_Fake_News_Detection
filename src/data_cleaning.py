@@ -1,6 +1,3 @@
-"""
-Data Cleaning - Load and clean WELFake-style CSV datasets.
-"""
 
 import re
 from typing import Optional, Tuple
@@ -24,16 +21,6 @@ def clean_welfake_dataframe(
     - Optional lowercase conversion
     - Drop rows with both title and text empty
     - Coerce labels to numeric
-    
-    Args:
-        df: Raw DataFrame from CSV
-        lowercase: Whether to convert text to lowercase
-        
-    Returns:
-        Cleaned DataFrame
-        
-    Raises:
-        ValueError: If required columns are missing
     """
     # Make a copy to avoid modifying original
     df = df.copy()
@@ -93,16 +80,7 @@ def drop_duplicate_articles(
     df: pd.DataFrame,
     report_conflicts: bool = True
 ) -> pd.DataFrame:
-    """
-    Drop duplicate articles based on (title, text) keeping first occurrence.
-    
-    Args:
-        df: DataFrame with title and text columns
-        report_conflicts: Whether to report label conflicts on duplicates
-        
-    Returns:
-        Deduplicated DataFrame
-    """
+   
     original_len = len(df)
     
     if report_conflicts:
@@ -136,17 +114,7 @@ def load_and_clean_csv(
     lowercase: bool = False,
     dedupe: bool = False
 ) -> pd.DataFrame:
-    """
-    Load CSV and apply cleaning pipeline.
-    
-    Args:
-        path: Path to CSV file (defaults to config.DATA_CSV)
-        lowercase: Whether to convert text to lowercase
-        dedupe: Whether to drop duplicate articles
-        
-    Returns:
-        Cleaned DataFrame
-    """
+   
     csv_path = path or str(DATA_CSV)
     
     print(f"Loading dataset from: {csv_path}")
@@ -171,15 +139,7 @@ def save_cleaned_sample(
     n_samples: Optional[int] = None,
     random_state: int = 42
 ) -> None:
-    """
-    Save a cleaned subset of the data to CSV.
     
-    Args:
-        df: Cleaned DataFrame
-        output_path: Path to save the sample
-        n_samples: Number of samples (None for all)
-        random_state: Random seed for sampling
-    """
     if n_samples is not None and n_samples < len(df):
         df = df.sample(n=n_samples, random_state=random_state)
     
@@ -193,23 +153,7 @@ def load_prepared_data(
     dedupe: bool = False,
     max_samples: Optional[int] = None
 ) -> Tuple[pd.DataFrame, str]:
-    """
-    Load and prepare data for training/evaluation.
-    
-    This is the main entry point for data loading that handles:
-    - Loading and cleaning the CSV
-    - Optional sampling for quick training
-    - Returns both the DataFrame and the resolved path
-    
-    Args:
-        data_path: Path to CSV file (defaults to config.DATA_CSV)
-        lowercase: Whether to convert text to lowercase
-        dedupe: Whether to drop duplicate articles
-        max_samples: Maximum samples to use (None for all)
-        
-    Returns:
-        Tuple of (cleaned DataFrame, resolved CSV path)
-    """
+   
     csv_path = data_path or str(DATA_CSV)
     
     # Load and clean

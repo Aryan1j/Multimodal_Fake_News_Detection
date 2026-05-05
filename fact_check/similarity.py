@@ -25,7 +25,6 @@ class SentenceSimilarity:
         if self.model is not None:
             return self.model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
 
-        # Fallback mode for offline environments without embedding downloads.
         if self.vectorizer is None:
             self.vectorizer = TfidfVectorizer(max_features=5000, stop_words="english")
             return self.vectorizer.fit_transform(texts).toarray()
